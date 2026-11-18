@@ -12,7 +12,9 @@
       "panel_package_name": "الباقة العليا",
       "salla_product_id": 1249359841,
       "init": "push_all",
-      "foreign_on_salla": 10
+      "foreign_on_salla": 10,
+      "mode": "browser",
+      "note": "الملكية تُضاف من المهمة المجدولة بالمتصفح لأنها تحتاج كود سناب أسبوعي من Snap MAX"
     },
     "silver": {
       "label": "الباقة الفضية",

@@ -237,6 +237,8 @@ def collect(names):
     pat = re.compile(CFG['code_pattern'])
     per, owner = {}, {}
     for k, m in CFG['products'].items():
+        if m.get('mode') == 'browser':
+            continue
         if names is not None:
             nm = names.get(m['panel_package_id'])
             if nm != m['panel_package_name']:
@@ -346,6 +348,8 @@ def run_check(st):
     names = fxr_package_names()
     lines = []
     for k, m in CFG['products'].items():
+        if m.get('mode') == 'browser':
+            continue
         unused = {fp((r.get('code') or '').strip()) for r in fxr_codes(m['panel_package_id'], 'unused') if r.get('code')}
         mine = [h for h, e in st['ledger'].items() if e['p'] == k]
         used_now = [h for h in mine if h not in unused]
