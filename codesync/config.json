@@ -1,0 +1,28 @@
+{
+  "fxr_api": "https://fxr-plus.com/api/v1",
+  "salla_api": "https://api.salla.dev/admin/v2",
+  "salla_token_url": "https://accounts.salla.sa/oauth2/token",
+  "salla_auth_url": "https://accounts.salla.sa/oauth2/auth",
+  "salla_client_id": "",
+  "salla_redirect_uri": "https://fxr-plus.com/salla-callback",
+  "products": {
+    "royal": {
+      "label": "الباقة الملكية",
+      "panel_package_id": "a32f17da-9728-419c-ab78-945d0b013c95",
+      "panel_package_name": "الباقة العليا",
+      "salla_product_id": 1249359841,
+      "init": "push_all",
+      "foreign_on_salla": 10
+    },
+    "silver": {
+      "label": "الباقة الفضية",
+      "panel_package_id": "a1b21cf1-902b-42cb-948b-e4031d709198",
+      "panel_package_name": "الباقة الفضية",
+      "salla_product_id": 552199191,
+      "init": "assume_on_salla",
+      "foreign_on_salla": 0
+    }
+  },
+  "code_pattern": "^[A-Za-z0-9-]{6,64}$",
+  "push_chunk": 50
+}

@@ -1,0 +1,64 @@
+name: مزامنة أكواد سلة
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # إضافة الأكواد الجديدة كل 10 دقائق تقريباً
+    - cron: '23 1 * * *'     # الفحص اليومي 4:23 الفجر بتوقيت السعودية
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'sync = إضافة الأكواد، check = الفحص اليومي، auth = ربط سلة أول مرة'
+        type: choice
+        options: [sync, check, auth]
+        default: sync
+      salla_code:
+        description: 'كود الموافقة من سلة (فقط مع auth)'
+        required: false
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: codesync
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run
+        env:
+          SYNC_KEY: ${{ secrets.SYNC_KEY }}
+          FXR_API_KEY: ${{ secrets.FXR_API_KEY }}
+          SALLA_CLIENT_ID: ${{ secrets.SALLA_CLIENT_ID }}
+          SALLA_CLIENT_SECRET: ${{ secrets.SALLA_CLIENT_SECRET }}
+          SALLA_OAUTH_CODE: ${{ github.event.inputs.salla_code }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MODE_INPUT: ${{ github.event.inputs.mode }}
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          if [ -z "$SYNC_KEY" ] || [ -z "$FXR_API_KEY" ]; then
+            echo "الإعداد ما اكتمل (SYNC_KEY أو FXR_API_KEY ناقص) — تخطيت."
+            exit 0
+          fi
+          MODE="${MODE_INPUT:-sync}"
+          if [ "$SCHEDULE" = "23 1 * * *" ]; then MODE=check; fi
+          echo "::add-mask::$SALLA_OAUTH_CODE"
+          python3 codesync/sync.py "$MODE"
+      - name: Save state
+        if: always()
+        run: |
+          if [ -f codesync/.state_changed ]; then
+            rm -f codesync/.state_changed
+            git config user.name "fxr-codesync"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add codesync/state.enc
+            git commit -q -m "codesync: تحديث الحالة المشفرة [skip ci]" || exit 0
+            for i in 1 2 3; do
+              git pull -q --rebase origin main && git push -q origin HEAD:main && break
+              sleep 5
+            done
+          fi
